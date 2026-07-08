@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+}
+
+body {
+  background-color: #09090b;
+  color: #a1a1aa;
+}

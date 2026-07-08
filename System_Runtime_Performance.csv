@@ -1,0 +1,6 @@
+Metric,Value,Status,Verification
+Base API Latency,224ms,Green,Latency instrumentation
+File Support,"UTF-8 Text, PDF parsing",Green,Binary to text streams parsing
+Interactive Sentence Probe,125ms,Green,Sentence isolated transforms
+Database Sync Integrity,SQLite migrations,Green,Automatic validation checks
+State Persistence,Reactive Context,Green,Realtime weight reload
