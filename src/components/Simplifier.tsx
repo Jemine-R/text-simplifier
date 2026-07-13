@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, FeedbackData, Transformation } from '../types';
+import { API_URL } from '../config';
 import { simplifyText, simplifyDocument, analyzeFeedback, simplifySentence } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 import { BookOpen, Sparkles, Send, RefreshCw, AlertCircle, CheckCircle2, Star, MessageSquare, Upload, FileText, X, File, History, User, MousePointer2, Clock } from 'lucide-react';
@@ -48,7 +49,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
         loraRank: rank
       };
       
-      const res = await fetch('/api/profile', {
+      const res = await fetch(`${API_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProfile)
@@ -100,7 +101,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
   const fetchHistory = async () => {
     if (!profile.userId) return;
     try {
-      const res = await fetch(`/api/transformations/${profile.userId}`);
+      const res = await fetch(`${API_URL}/api/transformations/${profile.userId}`);
       const data = await res.json();
       setHistory(data);
     } catch (err) {
@@ -213,7 +214,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
       
       // Save transformation to DB
       if (profile.userId && saveToHistory) {
-        await fetch('/api/transformations', {
+        await fetch(`${API_URL}/api/transformations`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -253,7 +254,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
 
       // Save transformation to DB
       if (profile.userId && saveToHistory) {
-        await fetch('/api/transformations', {
+        await fetch(`${API_URL}/api/transformations`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -281,7 +282,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
     try {
       const category = feedback.comments ? await analyzeFeedback(feedback.comments) : 'general';
       
-      const res = await fetch('/api/feedback', {
+      const res = await fetch(`${API_URL}/api/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -301,7 +302,7 @@ export default function Simplifier({ profile, onUpdateProfile, onUpdateProfileSt
       if (resData && resData.status === 'success') {
         // Trigger a profile re-fetch so that the saved adapter is immediately active
         if (profile.userId && onUpdateProfileState) {
-          const profileRes = await fetch(`/api/profile/${profile.userId}`);
+          const profileRes = await fetch(`${API_URL}/api/profile/${profile.userId}`);
           const profileData = await profileRes.json();
           if (profileData && profileData.updatedAt) {
             onUpdateProfileState(profileData);

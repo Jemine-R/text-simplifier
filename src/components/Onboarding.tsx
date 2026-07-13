@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
+import { API_URL } from '../config';
 import { ChevronRight, ChevronLeft, Save, BookOpen } from 'lucide-react';
 
 interface OnboardingProps {
@@ -77,12 +78,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     setError('');
     try {
       // Check if user exists
-      const res = await fetch(`/api/users/${username}`);
+      const res = await fetch(`${API_URL}/api/users/${username}`);
       const user = await res.json();
 
       if (user) {
         // User exists, fetch profile
-        const profRes = await fetch(`/api/profile/${user.id}`);
+        const profRes = await fetch(`${API_URL}/api/profile/${user.id}`);
         const existingProfile = await profRes.json();
         if (existingProfile) {
           onComplete({ ...existingProfile, username: user.username, userId: user.id });
@@ -92,7 +93,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         setCurrentStep(0);
       } else {
         // Create new user
-        const createRes = await fetch('/api/users', {
+        const createRes = await fetch(`${API_URL}/api/users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username })
@@ -117,7 +118,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       setCurrentStep(currentStep + 1);
     } else {
       // Save profile
-      const res = await fetch('/api/profile', {
+      const res = await fetch(`${API_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile)

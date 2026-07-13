@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { FeedbackAnalysis } from '../types';
+import { API_URL } from '../config';
 import { BarChart3, TrendingUp, Users, PieChart, Activity } from 'lucide-react';
 
 export default function Dashboard() {
@@ -8,7 +9,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/feedback-analysis')
+    fetch(`${API_URL}/api/feedback-analysis`)
       .then(res => res.json())
       .then(setData)
       .finally(() => setIsLoading(false));
