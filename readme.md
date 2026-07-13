@@ -68,3 +68,13 @@ text-simplifier/
   2. Framework: Vite, build: pnpm install && pnpm run build, output: dist
   3. Set env vars: VITE_API_URL=https://your-backend.up.railway.app, GEMINI_API_KEY=...
   4. Deploy
+
+
+## Media
+
+![Landing Page](media/picture1.png)
+![Adding Name](media/picture2.png)
+![First Selection](media/picture3.png)
+![Second Selection](media/picture4.png)
+![FInal Selection](media/picture5.png)
+![Preview of the Dashboard](media/picture6.png)
