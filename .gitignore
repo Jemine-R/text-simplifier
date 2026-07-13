@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+.pnpm-approve-builds.json
+package-lock.json
+backend/simplifier.db
