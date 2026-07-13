@@ -1,12 +1,40 @@
 # GRANULAR TEXT SIMPLIFIER.
 _A Final Year Project by [Edema Oritsejeminetemi](https://github.com/Jemine-R)_
 
-## Project Stack
-- **React + TypeScript + Vite frontend**
-- **Express + TypeScript backend**
-- **SQLite (local) / PostgreSQL (production)**
-- **Google Gemini AI**
-- **pnpm**
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4 |
+| Backend | Express 4, TypeScript, tsx |
+| Database | SQLite (local) / PostgreSQL (production) |
+| AI | Google Gemini 3 Flash |
+| Deployment | Vercel (frontend) + Railway (backend + PostgreSQL) |
+
+## Project Structure
+
+```
+text-simplifier/
+├── backend/              # Express API server
+│   ├── server.ts         # API routes + DB initialization
+│   ├── db.ts             # Database abstraction (SQLite/PostgreSQL)
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── Procfile
+│   └── .env.example
+├── docs/                 # Evaluation reports & compliance docs
+├── src/                  # React frontend
+│   ├── components/       # UI components (Onboarding, Simplifier, Dashboard)
+│   ├── services/         # Gemini AI integration
+│   ├── config.ts         # API URL configuration
+│   ├── App.tsx           # Root component + routing
+│   └── main.tsx          # Entry point
+├── index.html            # Vite HTML entry
+├── vite.config.ts
+├── vercel.json
+├── package.json
+└── README.md
+```
 
 ## How to Run
 
