@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, Transformation } from './types';
+import { API_URL } from './config';
 import Onboarding from './components/Onboarding';
 import Simplifier from './components/Simplifier';
 import Dashboard from './components/Dashboard';
@@ -28,7 +29,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch(`/api/profile/${savedUserId}`);
+      const res = await fetch(`${API_URL}/api/profile/${savedUserId}`);
       const data = await res.json();
       if (data && data.updatedAt) {
         setProfile(data);
@@ -42,7 +43,7 @@ export default function App() {
 
   const handleProfileComplete = async (newProfile: UserProfile) => {
     try {
-      await fetch('/api/profile', {
+      await fetch(`${API_URL}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProfile)
