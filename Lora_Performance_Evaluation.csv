@@ -1,5 +1,0 @@
-Rank,Tuned Parameters,Relative Weight Footprint,Calibration Convergence,Persona Alignment,Volatility
-4,393216,1536 KB,426ms,92.5%,0.0060
-8,786432,3072 KB,520ms,98.3%,0.0120
-16,1572864,6144 KB,705ms,99.3%,0.0240
-32,3145728,12288 KB,1108ms,99.6%,0.0480
