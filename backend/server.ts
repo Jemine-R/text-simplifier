@@ -1,13 +1,8 @@
+import "dotenv/config";
 import express from "express";
-import { createServer as createViteServer } from "vite";
-import path from "path";
-import { fileURLToPath } from "url";
-import { db } from "./server/db";
+import cors from "cors";
+import { db } from "./db";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Initialize tables
 async function initializeDatabase() {
   if (db.isPostgres) {
     console.log("Initializing/Verifying Supabase PostgreSQL tables...");
@@ -77,7 +72,6 @@ async function initializeDatabase() {
       );
     `);
   } else {
-    // Local SQLite Database Initialization
     console.log("Initializing/Verifying local SQLite tables...");
     await db.execRaw(`
       CREATE TABLE IF NOT EXISTS users (
@@ -149,7 +143,6 @@ async function initializeDatabase() {
       );
     `);
 
-    // Run SQLite migrations if necessary
     try {
       await db.queryOne("SELECT userId FROM feedback_logs LIMIT 1");
     } catch (e) {
@@ -202,14 +195,17 @@ async function initializeDatabase() {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
-  // Initialize DB
   await initializeDatabase();
 
+  app.use(cors({
+    origin: [/\.vercel\.app$/, /localhost/],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  }));
   app.use(express.json());
 
-  // API Routes
   app.get("/api/users/:username", async (req, res) => {
     try {
       const user = await db.queryOne("SELECT * FROM users WHERE username = ?", [req.params.username]);
@@ -227,8 +223,8 @@ async function startServer() {
       res.json({ id, username });
     } catch (e: any) {
       if (
-        e.message.includes('UNIQUE constraint failed') || 
-        e.code === '23505' || 
+        e.message.includes('UNIQUE constraint failed') ||
+        e.code === '23505' ||
         e.message.includes('unique constraint')
       ) {
         res.status(400).json({ error: "Username already exists" });
@@ -290,7 +286,7 @@ async function startServer() {
         p.metaphorUsage, p.preferredStructure, p.readingLevel, p.outputStyle,
         explanationDepth, visualLayout, loraEnabled, loraRank, loraTrained
       ]);
-      
+
       res.json({ status: "success" });
     } catch (e: any) {
       console.error("Profile save error:", e);
@@ -327,17 +323,17 @@ async function startServer() {
   app.get("/api/feedback-analysis", async (req, res) => {
     try {
       const categories = await db.query(`
-        SELECT category as name, COUNT(*) as count 
-        FROM feedback_logs 
-        WHERE category IS NOT NULL 
+        SELECT category as name, COUNT(*) as count
+        FROM feedback_logs
+        WHERE category IS NOT NULL
         GROUP BY category
       `);
-      
+
       const stats = await db.queryOne(`
-        SELECT AVG("clarityScore") as "averageClarity", COUNT(*) as "totalEntries" 
+        SELECT AVG("clarityScore") as "averageClarity", COUNT(*) as "totalEntries"
         FROM feedback_logs
       `);
-      
+
       res.json({
         categories,
         averageClarity: stats && stats.averageClarity ? Number(stats.averageClarity) : 0,
@@ -351,7 +347,6 @@ async function startServer() {
   app.post("/api/feedback", async (req, res) => {
     const { userId, originalText, simplifiedText, q1_answer, q2_answer, q3_answer, comments, readingTime } = req.body;
     try {
-      // Determine sub-scores
       let q1_val = 1.0;
       if (q1_answer === "partially-retained") q1_val = 0.5;
       else if (q1_answer === "meaning-lost") q1_val = 0.0;
@@ -367,18 +362,17 @@ async function startServer() {
       const compositeScore = Math.round(((q1_val + q2_val + q3_val) / 3) * 100) / 100;
       const finalReadingTime = readingTime !== undefined ? Number(readingTime) : 0;
 
-      // Insert into interactions table
       await db.execute(`
         INSERT INTO interactions (
           "userId", "originalText", "simplifiedText", q1_answer, q2_answer, q3_answer, "compositeScore", "readingTime"
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `, [
-        userId || null, 
-        originalText || "", 
-        simplifiedText || "", 
-        q1_answer || "fully-retained", 
-        q2_answer || "extremely-clear", 
-        q3_answer || "perfect-tone", 
+        userId || null,
+        originalText || "",
+        simplifiedText || "",
+        q1_answer || "fully-retained",
+        q2_answer || "extremely-clear",
+        q3_answer || "perfect-tone",
         compositeScore,
         finalReadingTime
       ]);
@@ -387,30 +381,28 @@ async function startServer() {
       const toneScore = Math.round(q3_val * 5);
       const lengthScore = Math.round(q1_val * 5);
 
-      // Maintain backward-compatible feedback logging
       await db.execute(`
         INSERT INTO feedback_logs (
           "userId", "originalText", "simplifiedText", "clarityScore", "lengthScore", "toneScore", comments, category, "profileUsed", "readingTime"
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         userId || null,
-        originalText || "", 
-        simplifiedText || "", 
-        clarityScore, 
-        lengthScore, 
-        toneScore, 
-        comments || "", 
+        originalText || "",
+        simplifiedText || "",
+        clarityScore,
+        lengthScore,
+        toneScore,
+        comments || "",
         'general',
         JSON.stringify({ q1_answer, q2_answer, q3_answer, compositeScore }),
         finalReadingTime
       ]);
 
-      // Check LoRA Trigger threshold (After 5 interactions with composite score >= 0.6)
       let triggeredFineTuning = false;
       let highQualityCount = 0;
       if (userId) {
         const row = await db.queryOne(`
-          SELECT COUNT(*) as count FROM interactions 
+          SELECT COUNT(*) as count FROM interactions
           WHERE "userId" = ? AND "compositeScore" >= 0.6
         `, [userId]);
         highQualityCount = row ? Number(row.count) : 0;
@@ -423,32 +415,17 @@ async function startServer() {
         }
       }
 
-      res.json({ 
-        status: "success", 
-        compositeScore, 
+      res.json({
+        status: "success",
+        compositeScore,
         highQualityCount,
-        triggeredFineTuning 
+        triggeredFineTuning
       });
     } catch (e: any) {
       console.error("Feedback save error:", e);
       res.status(500).json({ error: e.message });
     }
   });
-
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -22,7 +22,6 @@ if (connectionString) {
   sqliteDb.pragma('foreign_keys = ON');
 }
 
-// Automatically convert SQLite '?' placeholders to PostgreSQL '$1, $2, $3...'
 function convertSql(sql: string): string {
   if (!isPostgres) return sql;
   let index = 1;
