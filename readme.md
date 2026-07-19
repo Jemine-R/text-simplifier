@@ -6,7 +6,7 @@ _A Final Year Project by [Edema Oritsejeminetemi](https://github.com/Jemine-R)_
 | Layer | Technology |
 |---|---|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS v4 |
-| Backend | Express 4, TypeScript, tsx |
+| Backend | Express 4, TypeScript, tsx | (BART for simplification |
 | Database | SQLite (local) / PostgreSQL (production) |
 | AI | Google Gemini 3 Flash |
 | Deployment | Vercel (frontend) + Railway (backend + PostgreSQL) |
